@@ -1,0 +1,6 @@
+import { ClipboardCheck } from 'lucide-react';
+import type { AssessmentResult } from '../../types/assessment';
+
+export function AssessmentCard({ result, onRun }: { result?: AssessmentResult; onRun: () => void }) {
+  return <div><div className="flex items-start gap-3"><div className="rounded-xl bg-violet-50 p-2.5 text-violet-700"><ClipboardCheck size={21}/></div><div><p className="font-bold text-slate-900">Independent 15-question diagnostic</p><p className="mt-1 text-sm text-slate-500">Assessment is isolated from the adaptive state. It reports evidence but does not silently unlock lessons or change competency.</p></div></div><button onClick={onRun} className="btn-secondary mt-4">Run assessment demo</button>{result && <div className="mt-4"><div className="flex items-end gap-2"><span className="text-3xl font-extrabold text-slate-900">{result.score}%</span><span className="pb-1 text-xs font-semibold text-slate-500">overall score</span></div><div className="mt-3 grid gap-2 sm:grid-cols-3">{result.topicAnalysis.map(t => <div key={t.topicId} className="rounded-lg border border-slate-200 p-2"><p className="text-xs font-semibold text-slate-800">{t.topicId}</p><p className="mt-1 text-xs text-slate-500">{t.percentage}% · {t.strength.replace('_', ' ')}</p></div>)}</div></div>}</div>;
+}

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM"],
+    "rootDir": "src",
+    "outDir": ".core-build"
+  },
+  "include": ["src/types/**/*.ts", "src/data/**/*.ts", "src/services/**/*.ts"],
+  "exclude": ["src/store/**/*", "src/components/**/*", "src/pages/**/*"]
+}
