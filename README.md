@@ -8,6 +8,13 @@ PathPilot is a from-scratch prototype that demonstrates a closed adaptive compet
 
 It is intentionally **not** a generic LMS. Its main job is to explain what a learner knows, what they are missing, why they are missing it, and what should happen next.
 
+## Initial diagnostic before gap calculation
+
+The learner flow now starts with a required 10-question Python diagnostic. PathPilot does not display the competency gap or adaptive roadmap until this diagnostic is submitted. The diagnostic computes topic-level performance across Python Basics, Python Functions, Python Data Structures and Analytical Python, combines those results with configured topic weights, and explicitly initializes the learner's current competency. The existing Skill Gap Engine then detects weak topics and prerequisite blockers, and the existing Adaptive Decision Engine remains the single authority for choosing the next action.
+
+For the canonical SIH demo response profile, the diagnostic produces **48/100**, which yields **48 current / 80 required / gap 32** and selects **REPAIR_PREREQUISITE → Python Functions**. Different learner answers legitimately produce different competency and gap values. The later independent 15-question assessment remains isolated and does not silently mutate adaptive state.
+
+
 ## Stack
 
 - React + TypeScript + Vite
@@ -108,3 +115,11 @@ PathPilot is a client-side Vite prototype and does not require a backend for the
 - Output directory: `dist`
 
 No environment variables are required by the current prototype.
+
+### Learner study material assistant
+
+Learners can paste or upload `.txt` / `.md` study material for a selected topic. The prototype deterministically generates a concise summary, up to five key points, and exactly seven self-study MCQs. The quiz is feedback-only and cannot directly change competency, evidence, or the adaptive roadmap.
+
+### Learner AI Learning Coach (prototype)
+
+The learner dashboard includes a context-aware learning coach for the active adaptive topic. It supports free-form learner questions plus quick actions for **Explain**, **Hint**, **Example**, **Simplify**, and a **5-question sample assessment**. The current implementation is deterministic/local and intentionally does not claim a production LLM connection. Coach responses may use the active module objectives and the learner's generated study pack as context. Coach assessments are practice-only and never directly modify competency, evidence, verification, or the adaptive roadmap.
