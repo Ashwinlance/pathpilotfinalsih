@@ -1,9 +1,11 @@
 import type { LearningModule } from '../../types/learning';
 
 export const learningModules: LearningModule[] = [
+  { id: 'module-py-basics', topicId: 'py-basics', title: 'Repair: Python Basics', summary: 'Strengthen variables, basic types, conditions and loops before moving into functions.', estimatedMinutes: 15, objectives: ['Use variables and basic types', 'Apply conditions correctly', 'Use loops for repeated work'] },
   { id: 'module-py-functions', topicId: 'py-functions', title: 'Repair: Python Functions', summary: 'Build reliable function fundamentals before moving into analytical workflows.', estimatedMinutes: 18, objectives: ['Define reusable functions', 'Use parameters and return values', 'Explain local scope'] },
   { id: 'module-py-data', topicId: 'py-data', title: 'Python Data Structures', summary: 'Practice structured data manipulation with lists and dictionaries.', estimatedMinutes: 22, objectives: ['Transform sequences', 'Work with mappings', 'Compose transformations'] },
   { id: 'module-py-analysis', topicId: 'py-analysis', title: 'Analytical Python', summary: 'Build a simple, testable data analysis pipeline.', estimatedMinutes: 28, objectives: ['Structure an analysis', 'Separate transformation stages', 'Validate outputs'] },
+  { id: 'module-py-testing', topicId: 'py-testing', title: 'Python Testing & Validation', summary: 'Write focused tests and validation checks so analytical Python changes remain reliable.', estimatedMinutes: 24, objectives: ['Write assertions for expected behavior', 'Create representative test cases', 'Validate analytical outputs and edge cases'] },
   { id: 'module-sql-select', topicId: 'sql-select', title: 'Repair: SQL SELECT', summary: 'Strengthen query fundamentals needed for joins.', estimatedMinutes: 16, objectives: ['Select columns', 'Use aliases', 'Write expressions'] },
   { id: 'module-sql-filter', topicId: 'sql-filter', title: 'SQL Filtering', summary: 'Apply predicates and ordering accurately.', estimatedMinutes: 17, objectives: ['Filter rows', 'Combine conditions', 'Order results'] },
   { id: 'module-sql-joins', topicId: 'sql-joins', title: 'SQL Joins', summary: 'Combine normalized tables using appropriate join keys.', estimatedMinutes: 25, objectives: ['Choose join type', 'Use join keys', 'Detect duplicate inflation'] },

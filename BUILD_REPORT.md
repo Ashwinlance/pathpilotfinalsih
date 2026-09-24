@@ -124,3 +124,18 @@ Validation performed in this workspace:
 - Learning-assistant service check: PASS (Explain/Hint/Example, 5-question assessment, 5/5 grading).
 - Offline TypeScript audit of the new React component/service/types: PASS.
 - Dependency-backed npm install was attempted but the execution environment timed out; run the normal npm validation commands in the user's local project after overlaying this cumulative update.
+
+
+## Learning-flow bug fix — 2026-09-25
+
+Fixed the adaptive dead end observed when a diagnostic selected **Python Basics** as the prerequisite blocker. `py-basics` now has a mapped learning module and five topic-specific MCQs. All Python adaptive topics (`py-basics`, `py-functions`, `py-data`, `py-analysis`) now have five-question mastery checks. After learning completion, submitting a passing score (>=70%, which means 4/5 or 5/5) automatically uses the existing verification service to create approved evidence; failed attempts do not update competency. The separate Adaptive Decision Engine remains authoritative.
+
+Validation performed in the build workspace:
+- Core TypeScript compilation: PASS
+- Core validation harness: **15/15 PASS**
+- Full npm install/test/build: not re-run in this workspace because package installation timed out; run the normal four npm commands in the user's local repository before commit/deployment.
+
+## Governance v2 update
+
+Added a governed competency-standard application flow. The demo proposal remains non-operative until human approval. Approval changes the Statistical Data Analyst Python requirement from 80% to 85%, adds Python Testing & Validation to the governed topic catalog and learner roadmap, recalculates the gap/adaptive action, and records the review in the audit trail. Rejection makes no competency or roadmap change.
+

@@ -48,10 +48,10 @@ export function LearningActionCard({
 
       <div className="mt-4 flex flex-wrap gap-2">
         {!started && <button onClick={onStart} className="btn-primary">Start learning</button>}
-        {started && !completed && <button onClick={onComplete} className="btn-primary">Mark learning complete</button>}
-        {completed && practiceComplete && !verified && <button onClick={onVerify} className="btn-primary"><FlaskConical size={16}/> Run demo verification</button>}
-        {completed && hasPractice && !practiceComplete && <span className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">Complete the 5 MCQs to continue to verification.</span>}
-        {verified && <span className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700"><CircleCheckBig size={17}/> Verification passed</span>}
+        {started && !completed && <button onClick={onComplete} className="btn-primary">I've learned this — take 5 MCQs</button>}
+        {completed && !hasPractice && !verified && <button onClick={onVerify} className="btn-primary"><FlaskConical size={16}/> Run verification</button>}
+        {completed && hasPractice && !practiceComplete && <span className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">Answer all 5 MCQs and submit. A passing result updates competency automatically.</span>}
+        {verified && <span className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700"><CircleCheckBig size={17}/> Verification passed · competency updated</span>}
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-3">

@@ -8,12 +8,14 @@ import { getTopicPracticeQuestions } from '../data/learning/topicPracticeQuestio
 import { questions, questionPools } from '../data/assessments/questions';
 import { pythonInitialDiagnosticConfig, pythonInitialDiagnosticQuestions } from '../data/assessments/initialDiagnostic';
 import { governanceSources } from '../data/governance/sources';
+import { pythonCompetencyUpdateV2 } from '../data/governance/pythonCompetencyUpdate';
 import type { AdaptiveState } from '../types/adaptive';
 import type { Assessment, AssessmentAnswer, AssessmentGuidance, AssessmentMaterial, AssessmentResult, DiagnosticAssessment, DiagnosticResult, Question, QuestionPool } from '../types/assessment';
 import type { Evidence, LearningState, StudyPack, StudyQuizAnswer, StudyQuizResult, TopicPracticeAnswer, TopicPracticeResult, Verification } from '../types/learning';
 import type { LearnerState } from '../types/learner';
 import type { Topic } from '../types/topic';
 import type { AuditRecord, GovernanceProposal } from '../types/governance';
+import type { Role } from '../types/role';
 import { buildInitialAdaptiveState, applyVerificationEvidence } from '../services/adaptive/adaptiveLoopService';
 import { completeLearning, startLearning, verifyLearning } from '../services/learning/learningService';
 import { gradeTopicPractice } from '../services/learning/topicPracticeService';
@@ -24,12 +26,15 @@ import { buildAssessmentGuidance } from '../services/assessment/assessmentGuidan
 import { createInitialDiagnostic, gradeInitialDiagnostic } from '../services/assessment/diagnosticService';
 import { initializeCompetencyFromDiagnostic } from '../services/assessment/diagnosticIntegrationService';
 import { createProposal, reviewProposal } from '../services/governance/governanceService';
+import { applyApprovedGovernanceKnowledgeUpdate } from '../services/governance/governanceKnowledgeUpdateService';
 
 export type ActiveRole = 'SELECT' | 'LEARNER' | 'ADMIN';
 
 interface StoreState {
   activeRole: ActiveRole;
   learnerState: LearnerState;
+  targetRole: Role;
+  knowledgeVersion: number;
   topics: Topic[];
   adaptiveState: AdaptiveState;
   diagnosticQuestions: Question[];
@@ -101,6 +106,8 @@ function initialAssessmentState() {
 export const usePathPilotStore = create<StoreState>((set, get) => ({
   activeRole: 'SELECT',
   learnerState: structuredClone(demoLearnerState),
+  targetRole: structuredClone(demoRole),
+  knowledgeVersion: 1,
   topics: structuredClone(initialTopics),
   adaptiveState: makeInitialAdaptive(),
   diagnosticQuestions: structuredClone(pythonInitialDiagnosticQuestions),
@@ -148,7 +155,7 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const currentLearnerComp = state.learnerState.competencies.find(competency => competency.competencyId === result.competencyId);
     if (!currentLearnerComp) return;
     const initialized = initializeCompetencyFromDiagnostic({ learnerCompetency: currentLearnerComp, result, topics: state.topics });
-    const requiredLevel = demoRole.competencyRequirements.find(requirement => requirement.competencyId === result.competencyId)?.requiredLevel ?? 80;
+    const requiredLevel = state.targetRole.competencyRequirements.find(requirement => requirement.competencyId === result.competencyId)?.requiredLevel ?? 80;
     const snapshot = buildInitialAdaptiveState({ learnerId: demoLearner.id, learnerCompetency: initialized.learnerCompetency, requiredLevel, topics: initialized.topics });
     set({
       diagnosticResult: result,
@@ -180,8 +187,13 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const topicId = state.adaptiveState.currentAction.targetTopicId;
     if (!topicId || !state.learningState?.completedAt) return;
     const practiceQuestions = getTopicPracticeQuestions(topicId);
-    if (practiceQuestions.length === 0 || practiceQuestions.some(question => !state.topicPracticeAnswers.some(answer => answer.questionId === question.id))) return;
-    set({ topicPracticeResult: gradeTopicPractice(topicId, practiceQuestions, state.topicPracticeAnswers) });
+    if (practiceQuestions.length !== 5 || practiceQuestions.some(question => !state.topicPracticeAnswers.some(answer => answer.questionId === question.id))) return;
+    const result = gradeTopicPractice(topicId, practiceQuestions, state.topicPracticeAnswers);
+    set({ topicPracticeResult: result });
+    // The five-question topic check is the deterministic verification step for the
+    // current learning module. A passing score creates approved evidence through
+    // the existing verification service; failed attempts never update competency.
+    if (result.score >= 70) get().runHeroVerification();
   },
   retryCurrentPractice: () => set({ topicPracticeAnswers: [], topicPracticeResult: undefined }),
   generateLearnerStudyPack: input => {
@@ -212,13 +224,16 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const state = get();
     if (!state.diagnosticResult || !state.learningState?.completedAt) return;
     const currentTopicId = state.adaptiveState.currentAction.targetTopicId;
-    if (getTopicPracticeQuestions(currentTopicId).length > 0 && state.topicPracticeResult?.topicId !== currentTopicId) return;
+    const configuredPractice = getTopicPracticeQuestions(currentTopicId);
+    if (configuredPractice.length > 0 && state.topicPracticeResult?.topicId !== currentTopicId) return;
+    if (configuredPractice.length > 0 && (state.topicPracticeResult?.score ?? 0) < 70) return;
     const topicId = state.adaptiveState.currentAction.targetTopicId ?? 'py-functions';
     const topic = state.topics.find(t => t.id === topicId); if (!topic) return;
     const module = learningModules.find(m => m.topicId === topicId) ?? learningModules[0];
-    const result = verifyLearning({ learnerId: demoLearner.id, competencyId: topic.competencyId, topicId, moduleId: module.id, score: 86 });
+    const verificationScore = state.topicPracticeResult?.topicId === topicId ? state.topicPracticeResult.score : 86;
+    const result = verifyLearning({ learnerId: demoLearner.id, competencyId: topic.competencyId, topicId, moduleId: module.id, score: verificationScore });
     if (!result.evidence) return;
-    const req = demoRole.competencyRequirements.find(r => r.competencyId === topic.competencyId)?.requiredLevel ?? 80;
+    const req = state.targetRole.competencyRequirements.find(r => r.competencyId === topic.competencyId)?.requiredLevel ?? 80;
     const currentLearnerComp = state.learnerState.competencies.find(c => c.competencyId === topic.competencyId)!;
     const snapshot = { learnerCompetency: currentLearnerComp, adaptiveState: state.adaptiveState, competencyGap: Math.max(0, req - currentLearnerComp.currentLevel) };
     const next = applyVerificationEvidence({ snapshot, evidence: result.evidence, requiredLevel: req, topics: state.topics });
@@ -309,18 +324,65 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
   createGovernanceDemoProposal: () => {
     const state = get();
     try {
-      const proposal = createProposal({ id: `proposal-${state.proposals.length + 1}`, source: governanceSources[0], title: 'Clarify Python function competency evidence', proposedChange: 'Require a passing verification artifact before marking function mastery.', evidenceSummary: 'Deterministic prototype extraction from an authorized source.', aiConfidence: 0.87, fingerprint: `python-functions-v${state.proposals.length + 1}`, existing: state.proposals });
+      const proposal = createProposal({
+        id: `proposal-${state.proposals.length + 1}`,
+        source: governanceSources[0],
+        title: 'Python competency standard v2',
+        proposedChange: 'Raise the Statistical Data Analyst Python requirement from 80% to 85% and add Python Testing & Validation as a governed roadmap topic.',
+        evidenceSummary: 'Deterministic prototype extraction from an authorized competency-standard update. Human approval is required before the requirement or curriculum changes.',
+        aiConfidence: 0.87,
+        fingerprint: pythonCompetencyUpdateV2.id,
+        existing: state.proposals,
+      });
       set({ proposals: [...state.proposals, proposal] });
-    } catch { /* deterministic demo; duplicate is safely ignored */ }
+    } catch { /* deterministic demo; duplicate approved/pending proposals are safely ignored */ }
   },
   reviewLatestProposal: decision => {
-    const state = get(); const latest = [...state.proposals].reverse().find(p => p.status === 'PENDING_REVIEW'); if (!latest) return;
-    const reviewed = reviewProposal(latest, { id: `review-${latest.id}`, proposalId: latest.id, reviewerId: 'admin-reviewer-001', decision, note: decision === 'APPROVE' ? 'Reviewed against source and approved.' : 'Rejected pending stronger evidence.', reviewedAt: new Date().toISOString() });
-    set({ proposals: state.proposals.map(p => p.id === latest.id ? reviewed.proposal : p), audit: [...state.audit, reviewed.audit] });
+    const state = get();
+    const latest = [...state.proposals].reverse().find(p => p.status === 'PENDING_REVIEW');
+    if (!latest) return;
+    const reviewed = reviewProposal(latest, {
+      id: `review-${latest.id}`,
+      proposalId: latest.id,
+      reviewerId: 'admin-reviewer-001',
+      decision,
+      note: decision === 'APPROVE' ? 'Reviewed against source and approved for competency standard v2.' : 'Rejected pending stronger evidence.',
+      reviewedAt: new Date().toISOString(),
+    });
+
+    if (decision === 'REJECT') {
+      set({ proposals: state.proposals.map(p => p.id === latest.id ? reviewed.proposal : p), audit: [...state.audit, reviewed.audit] });
+      return;
+    }
+
+    const pythonCompetency = state.learnerState.competencies.find(c => c.competencyId === pythonCompetencyUpdateV2.competencyId);
+    if (!pythonCompetency) return;
+    const applied = applyApprovedGovernanceKnowledgeUpdate({
+      proposal: reviewed.proposal,
+      update: pythonCompetencyUpdateV2,
+      role: state.targetRole,
+      topics: state.topics,
+      learnerCompetency: pythonCompetency,
+      adaptiveState: state.adaptiveState,
+    });
+    const actionChanged = applied.adaptiveState.currentAction.targetTopicId !== state.adaptiveState.currentAction.targetTopicId;
+    set({
+      targetRole: applied.role,
+      knowledgeVersion: pythonCompetencyUpdateV2.version,
+      topics: applied.topics,
+      adaptiveState: applied.adaptiveState,
+      proposals: state.proposals.map(p => p.id === latest.id ? reviewed.proposal : p),
+      audit: [...state.audit, reviewed.audit],
+      learningState: actionChanged ? undefined : state.learningState,
+      topicPracticeAnswers: actionChanged ? [] : state.topicPracticeAnswers,
+      topicPracticeResult: actionChanged ? undefined : state.topicPracticeResult,
+    });
   },
   resetDemo: () => set({
     activeRole: 'SELECT',
     learnerState: structuredClone(demoLearnerState),
+    targetRole: structuredClone(demoRole),
+    knowledgeVersion: 1,
     topics: structuredClone(initialTopics),
     adaptiveState: makeInitialAdaptive(),
     diagnosticQuestions: structuredClone(pythonInitialDiagnosticQuestions),

@@ -41,3 +41,24 @@ function labelFor(action: AdaptiveDecision['action']) {
   };
   return labels[action];
 }
+
+export function addGovernedRequirementStep(
+  roadmap: Roadmap,
+  topic: Topic,
+  reason: string,
+): Roadmap {
+  if (roadmap.steps.some(step => step.topicId === topic.id)) return roadmap;
+  const governedStep: RoadmapStep = {
+    id: `step-${roadmap.version}-governed-${topic.id}`,
+    topicId: topic.id,
+    action: 'LEARN_TARGET',
+    label: `New governed topic — ${topic.name}`,
+    reason,
+    status: 'UPCOMING',
+  };
+  const recalcIndex = roadmap.steps.findIndex(step => step.action === 'REASSESS');
+  const steps = [...roadmap.steps];
+  if (recalcIndex >= 0) steps.splice(recalcIndex, 0, governedStep);
+  else steps.push(governedStep);
+  return { ...roadmap, steps };
+}

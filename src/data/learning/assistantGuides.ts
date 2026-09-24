@@ -9,6 +9,19 @@ export interface LearningAssistantGuide {
 
 export const learningAssistantGuides: LearningAssistantGuide[] = [
   {
+    topicId: 'py-basics',
+    explanation: 'Python basics cover variables, core data types, conditions and loops. These concepts are the foundation required before functions and data transformations can be used reliably.',
+    simplified: 'Python basics are the building blocks: store values in variables, make decisions with if, and repeat work with loops.',
+    hint: 'Identify whether the problem needs a value, a decision, or repetition. That usually points to a variable, an if statement, or a loop.',
+    example: 'Example:\n\nscore = 72\nif score >= 70:\n    print("Pass")\n\nfor attempt in range(3):\n    print(attempt)\n\nThis uses a variable, a condition and a loop.',
+    keyTerms: {
+      variable: 'A variable is a name that refers to a value, such as score = 72.',
+      boolean: 'A Boolean value is either True or False and is often produced by comparisons.',
+      condition: 'A condition is an expression used by if/elif to decide which code should run.',
+      loop: 'A loop repeats a block of code, for example once for each item in a collection.',
+    },
+  },
+  {
     topicId: 'py-functions',
     explanation: 'A Python function is a reusable block of code that performs one focused task. Parameters receive input, the function body processes that input, return sends a result back to the caller, and local variables normally stay inside the function scope.',
     simplified: 'Think of a function like a small machine: give it inputs, let it do one job, and get an output back. Parameters are the inputs and return is the output.',
@@ -46,6 +59,19 @@ export const learningAssistantGuides: LearningAssistantGuide[] = [
       pipeline: 'A pipeline is an ordered sequence of data-processing stages.',
       validation: 'Validation checks that intermediate or final outputs satisfy expected conditions.',
       transformation: 'A transformation converts input data into a new representation.',
+    },
+  },
+  {
+    topicId: 'py-testing',
+    explanation: 'Python testing and validation check that functions and analytical outputs behave as expected. Assertions compare actual behavior with expected behavior, while representative test cases cover normal inputs, edge cases and failure conditions.',
+    simplified: 'Testing means checking that your Python code gives the result you expect, including unusual inputs.',
+    hint: 'Write down the expected result first, then create one normal case and one edge case and compare the actual output with those expectations.',
+    example: 'Example:\n\ndef add(a, b):\n    return a + b\n\nassert add(2, 3) == 5\nassert add(0, 0) == 0\n\nEach assertion checks a specific expected behavior.',
+    keyTerms: {
+      assertion: 'An assertion checks that a condition is true and surfaces a failure when the condition is false.',
+      test: 'A test runs a defined case and compares observed behavior with an expected result.',
+      validation: 'Validation checks that code or analytical output satisfies explicit rules or expectations.',
+      edge: 'An edge case is an unusual or boundary input that can reveal behavior missed by typical examples.',
     },
   },
   {

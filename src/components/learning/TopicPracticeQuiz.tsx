@@ -27,7 +27,7 @@ export function TopicPracticeQuiz({
         <div className="rounded-lg bg-white p-2 text-slate-700 shadow-sm"><CircleHelp size={18}/></div>
         <div>
           <p className="font-bold text-slate-900">Topic practice · {questions.length} MCQs</p>
-          <p className="mt-1 text-xs text-slate-500">Answer these questions for this topic before moving to verification. Practice does not directly change competency.</p>
+          <p className="mt-1 text-xs text-slate-500">Answer all 5 questions after learning. Score at least 70% (4/5) to create approved verification evidence and update competency.</p>
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export function TopicPracticeQuiz({
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Practice result</p>
             <p className="mt-1 text-lg font-extrabold text-slate-950">{result.correct}/{result.total} correct · {result.score}%</p>
-            <p className="mt-1 text-xs text-slate-500">This score is practice feedback only. Verification remains the mastery gate.</p>
+            <p className="mt-1 text-xs text-slate-500">A passing score is verified through PathPilot's evidence service. Below 70% does not change competency; retry the MCQs.</p>
           </div>
           <button type="button" onClick={onRetry} className="btn-secondary"><RotateCcw size={15}/> Retry MCQs</button>
         </div>

@@ -48,10 +48,10 @@ npm run build
 2. Observe Ananya's Python competency: **48 current / 80 required / 32 gap**.
 3. PathPilot explains the prerequisite blocker and chooses **REPAIR_PREREQUISITE**.
 4. Start the targeted learning module.
-5. Mark learning complete.
-6. Run the deterministic verification.
-7. A passing verification creates approved evidence.
-8. Competency moves **48 → 62**.
+5. Click **I've learned this — take 5 MCQs**.
+6. Answer the five topic-specific mastery-check questions and submit them.
+7. A passing score (at least 70%; 4/5) is sent through the deterministic verification service and creates approved evidence automatically. A failed attempt does not change competency.
+8. Competency moves **48 → 62** after approved evidence.
 9. Gap moves **32 → 18**.
 10. The roadmap version changes and the next action is recalculated.
 11. Run the independent assessment and note that it does **not** mutate adaptive state.
@@ -116,6 +116,11 @@ PathPilot is a client-side Vite prototype and does not require a backend for the
 
 No environment variables are required by the current prototype.
 
+
+### Topic learning mastery check
+
+Every Python adaptive topic now resolves to a real learning module, including **Python Basics**. After the learner marks a module as learned, PathPilot displays exactly **5 topic-specific MCQs**. Submitting a score of at least **70% (4/5)** runs the existing verification/evidence path automatically; only approved verification evidence increases competency and triggers gap/roadmap recalculation. Scores below the threshold leave competency unchanged and allow a retry.
+
 ### Learner study material assistant
 
 Learners can paste or upload `.txt` / `.md` study material for a selected topic. The prototype deterministically generates a concise summary, up to five key points, and exactly seven self-study MCQs. The quiz is feedback-only and cannot directly change competency, evidence, or the adaptive roadmap.
@@ -123,3 +128,16 @@ Learners can paste or upload `.txt` / `.md` study material for a selected topic.
 ### Learner AI Learning Coach (prototype)
 
 The learner dashboard includes a context-aware learning coach for the active adaptive topic. It supports free-form learner questions plus quick actions for **Explain**, **Hint**, **Example**, **Simplify**, and a **5-question sample assessment**. The current implementation is deterministic/local and intentionally does not claim a production LLM connection. Coach responses may use the active module objectives and the learner's generated study pack as context. Coach assessments are practice-only and never directly modify competency, evidence, verification, or the adaptive roadmap.
+
+## Governed competency version update
+
+The Admin governance demo now models an actual governed curriculum change rather than a cosmetic approval. Before human approval, the Statistical Data Analyst role requires **80% Python competency** and the learner curriculum does not contain `py-testing`. After a human reviewer approves **Python competency standard v2**, PathPilot:
+
+- raises the required Python competency from **80% to 85%**,
+- adds **Python Testing & Validation** as a governed Python topic,
+- adds the topic to the learner roadmap as an upcoming governed requirement,
+- recalculates the competency gap and authoritative adaptive decision using the existing Adaptive Decision Engine, and
+- creates the normal governance audit record.
+
+Rejecting the proposal leaves the 80% requirement and learner roadmap unchanged. AI proposal generation alone cannot apply the update.
+
