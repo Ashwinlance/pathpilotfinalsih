@@ -141,3 +141,46 @@ The Admin governance demo now models an actual governed curriculum change rather
 
 Rejecting the proposal leaves the 80% requirement and learner roadmap unchanged. AI proposal generation alone cannot apply the update.
 
+
+## SQL governed competency standard v2
+
+PathPilot now mirrors the governed Python standard update for SQL without creating a second adaptive engine.
+
+- SQL role requirement remains **78%** while the proposal is pending.
+- AI-assisted extraction cannot self-approve the change.
+- Human approval raises the SQL requirement to **83%**.
+- Approval adds **SQL Window Functions & Validation** as a governed topic with prerequisite `SQL Joins`.
+- A dedicated learning module and five mastery-check MCQs are available for the new topic.
+- Existing SQL SELECT, Filtering and Joins modules now also have five topic-specific mastery-check MCQs.
+- The approved SQL roadmap is retained separately from the active Python roadmap, so governance does not overwrite the learner's current Python adaptive state.
+
+## Recap Mode after inactivity
+
+PathPilot now includes an opt-in retention recap for returning learners.
+
+- A learner activity snapshot is stored through the persistence boundary with the last active timestamp and learned topic ids.
+- After **7 or more inactive days**, PathPilot offers (but does not force) a recap when the learner returns.
+- Choosing **Yes, start recap** creates a deterministic **5-MCQ** recap drawn from previously learned topics.
+- Choosing **No, continue learning** dismisses the recap and continues the normal learner flow.
+- Recap results show an overall retention score plus per-topic `WEAK`, `DEVELOPING`, or `RETAINED` status.
+- Topics below 70% are surfaced as weak review areas.
+- Recap results are formative only: they **do not directly change competency, evidence, prerequisites, or the adaptive roadmap**. Official competency changes still require the verification/evidence policy.
+
+This keeps the recap feature consistent with PathPilot's rule that practice and independent assessments inform learning but do not silently become mastery evidence.
+
+## Learner profile and role readiness
+
+The learner dashboard now keeps role context visible alongside the adaptive learning flow.
+
+- Student information includes learner ID, name, email and career track.
+- The learner has an explicit **current role** and **target role**.
+- For the demo learner, the transition is **Data Operations Trainee → Statistical Data Analyst**.
+- Required skills are derived directly from the selected target role's competency requirements rather than duplicated in the UI.
+- Before the initial diagnostic, the target-role skill table shows required levels while current level/gap stay **Pending**.
+- After the diagnostic, PathPilot shows each required skill with current level, required level, gap and readiness status (`READY`, `DEVELOPING`, or `PRIORITY GAP`).
+- Approved governance changes automatically update the displayed target-role requirements (for example Python 80→85 and SQL 78→83) without altering learner evidence.
+
+This keeps role-readiness calculation in the competency service layer and preserves the existing diagnostic and adaptive-engine boundaries.
+
+### Learner page order
+The learner experience is intentionally ordered as: Learner Profile & Role Readiness → Initial Diagnostic Assessment → Diagnostic Result → Competency/Gap → Adaptive Learning → Practice/Verification → Learning assistants → Independent Assessment. The assessment remains the explicit gate before PathPilot calculates the learner's initial competency gap.

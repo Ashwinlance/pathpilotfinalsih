@@ -135,3 +135,34 @@ export interface Evidence {
   createdAt: string;
   source: 'VERIFICATION';
 }
+
+export type RecapPromptStatus = 'OFFERED' | 'DECLINED' | 'STARTED' | 'COMPLETED';
+
+export interface RecapOffer {
+  daysAway: number;
+  topicIds: string[];
+  status: RecapPromptStatus;
+}
+
+export interface RecapTopicResult {
+  topicId: string;
+  correct: number;
+  total: number;
+  score: number;
+  level: 'WEAK' | 'DEVELOPING' | 'RETAINED';
+}
+
+export interface RecapResult {
+  correct: number;
+  total: number;
+  score: number;
+  topicResults: RecapTopicResult[];
+  weakTopicIds: string[];
+  completedAt: string;
+}
+
+export interface LearnerActivitySnapshot {
+  learnerId: string;
+  lastActiveAt: string;
+  learnedTopicIds: string[];
+}

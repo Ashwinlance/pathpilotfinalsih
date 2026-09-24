@@ -15,6 +15,14 @@ describe('topic practice', () => {
     }
   });
 
+
+  it('provides exactly five mastery-check MCQs for every SQL learning topic, including the governed v2 topic', () => {
+    for (const topicId of ['sql-select', 'sql-filter', 'sql-joins', 'sql-window']) {
+      expect(learningModules.some(module => module.topicId === topicId)).toBe(true);
+      expect(topicPracticeQuestions.filter(question => question.topicId === topicId)).toHaveLength(5);
+    }
+  });
+
   it('grades the five-question check deterministically', () => {
     const questions = topicPracticeQuestions.filter(question => question.topicId === 'py-functions');
     const result = gradeTopicPractice(

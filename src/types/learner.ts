@@ -2,8 +2,11 @@ import type { Evidence } from './learning';
 
 export interface Learner {
   id: string;
+  studentId: string;
   name: string;
   email: string;
+  careerTrack: string;
+  currentRoleId: string;
   targetRoleId: string;
 }
 

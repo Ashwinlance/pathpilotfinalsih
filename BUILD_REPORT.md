@@ -139,3 +139,53 @@ Validation performed in the build workspace:
 
 Added a governed competency-standard application flow. The demo proposal remains non-operative until human approval. Approval changes the Statistical Data Analyst Python requirement from 80% to 85%, adds Python Testing & Validation to the governed topic catalog and learner roadmap, recalculates the gap/adaptive action, and records the review in the audit trail. Rejection makes no competency or roadmap change.
 
+
+## SQL governance parity update
+
+Added a second governed competency-standard path for SQL while preserving the single Adaptive Decision Engine.
+
+Validated behavior:
+- pending SQL proposal cannot modify approved knowledge;
+- human approval changes required SQL competency **78 → 83**;
+- `SQL Window Functions & Validation` is added once after approval;
+- the governed SQL roadmap contains the new topic;
+- `sql-select`, `sql-filter`, `sql-joins`, and `sql-window` each have exactly five practice MCQs;
+- the new SQL learning module and AI-coach guide are present;
+- existing core validation remains **15/15 passed**.
+
+Full dependency-backed `npm test` / `npm run build` should still be executed on the user's local project before commit/push because dependency installation is unavailable in this execution environment.
+
+## Recap Mode update
+
+Added opt-in return-after-inactivity recap behavior:
+
+- inactivity threshold: 7 days
+- consent prompt: Start recap / No, continue learning
+- 5 deterministic MCQs from previously learned topics
+- per-topic retention analysis
+- weak topic threshold: <70%
+- recap does not mutate official competency or adaptive state
+
+Validation performed in the build environment:
+
+- `npm run validate:core`: PASS (15/15 existing core checks)
+- recap service smoke test: PASS (9-day absence detected, 5 MCQs selected, topic-level weak areas produced)
+- `npm test`: BLOCKED in the build container because project dependencies are not installed (`vitest: not found`). Run the full dependency-backed suite locally after copying the update.
+
+## Learner profile & role-readiness update
+
+Added a learner-side profile panel backed by the existing role and competency domain models.
+
+Behavior:
+- Demo learner now has a learner ID, career track and current-role reference.
+- Current role: **Data Operations Trainee**.
+- Target role: **Statistical Data Analyst**.
+- Target-role required skills are read from `Role.competencyRequirements` and matched to the existing competency catalog.
+- Before diagnostic completion, current skill/gap values remain hidden as pending.
+- After diagnostic completion, a deterministic role-readiness service reports current level, required level, gap and readiness status per skill.
+- The panel automatically reflects governed requirement changes because it reads the live target-role state rather than hard-coded UI values.
+
+Validation in this build workspace:
+- `npm run validate:core`: PASS, existing 15/15 checks.
+- Role-readiness service smoke test: PASS; Python 48 current / 80 required / 32 gap and 4 target-role skills returned.
+- Full dependency-backed React/Vitest/Vite validation could not be completed in this container because package installation timed out; run `npm run typecheck`, `npm test`, `npm run build`, and `npm run validate:core` locally after copying the cumulative update.

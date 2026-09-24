@@ -9,3 +9,14 @@ export interface Role {
   description: string;
   competencyRequirements: RoleCompetencyRequirement[];
 }
+
+export type RoleSkillReadinessStatus = 'READY' | 'DEVELOPING' | 'PRIORITY_GAP';
+
+export interface RoleSkillReadiness {
+  competencyId: string;
+  competencyName: string;
+  currentLevel: number;
+  requiredLevel: number;
+  gap: number;
+  status: RoleSkillReadinessStatus;
+}

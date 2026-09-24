@@ -171,6 +171,107 @@ export const topicPracticeQuestions: TopicPracticeQuestion[] = [
     prompt: 'Why are small deterministic tests valuable after a governed knowledge update?',
     options: ['They provide repeatable evidence that expected behavior still holds', 'They automatically approve governance proposals', 'They replace human review', 'They make prerequisites unnecessary'], correctOptionIndex: 0,
   },
+
+  {
+    id: 'practice-sql-select-1', topicId: 'sql-select',
+    prompt: 'Which SQL clause specifies the columns or expressions returned by a query?',
+    options: ['SELECT', 'WHERE', 'JOIN', 'ORDER BY'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-select-2', topicId: 'sql-select',
+    prompt: 'What does an alias do in a SELECT query?',
+    options: ['Gives a temporary readable name to a column or table', 'Deletes the original column', 'Creates a permanent database user', 'Automatically filters rows'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-select-3', topicId: 'sql-select',
+    prompt: 'Which query returns only name and score from learners?',
+    options: ['SELECT name, score FROM learners;', 'SELECT * WHERE learners;', 'FROM learners GET name, score;', 'SHOW name, score IN learners;'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-select-4', topicId: 'sql-select',
+    prompt: 'Why is selecting only required columns often preferable to SELECT *?',
+    options: ['It makes the intended output clearer and can reduce unnecessary data transfer', 'It guarantees every query is faster', 'It removes the need for a FROM clause', 'It automatically creates indexes'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-select-5', topicId: 'sql-select',
+    prompt: 'What is a SQL expression in a SELECT list used for?',
+    options: ['Compute a value from columns, literals or functions', 'Approve governance proposals', 'Create a new database server', 'Replace every table key'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-filter-1', topicId: 'sql-filter',
+    prompt: 'Which clause filters rows based on a condition?',
+    options: ['WHERE', 'SELECT', 'FROM', 'AS'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-filter-2', topicId: 'sql-filter',
+    prompt: 'Which operator requires both conditions to be true?',
+    options: ['AND', 'OR', 'AS', 'DESC'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-filter-3', topicId: 'sql-filter',
+    prompt: 'What does ORDER BY score DESC do?',
+    options: ['Sorts score from highest to lowest', 'Filters out low scores', 'Groups identical scores', 'Renames the score column'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-filter-4', topicId: 'sql-filter',
+    prompt: 'Which predicate correctly keeps rows with score at least 70?',
+    options: ['score >= 70', 'score => 70', 'score IS 70+', 'score ATLEAST 70'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-filter-5', topicId: 'sql-filter',
+    prompt: 'Why should complex filters be built one condition at a time?',
+    options: ['It makes the logic easier to validate and debug', 'It removes the need for SQL syntax', 'It always changes OR into AND', 'It guarantees no NULL values'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-joins-1', topicId: 'sql-joins',
+    prompt: 'What is the primary purpose of a SQL JOIN?',
+    options: ['Combine related rows from multiple tables', 'Sort a single table only', 'Rename a database', 'Delete duplicate columns automatically'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-joins-2', topicId: 'sql-joins',
+    prompt: 'What should a JOIN condition normally identify?',
+    options: ['The relationship between matching key columns', 'Only the table with more rows', 'The display order of columns', 'A random row from each table'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-joins-3', topicId: 'sql-joins',
+    prompt: 'What does an INNER JOIN return?',
+    options: ['Rows with matching records on both sides', 'Every row from both tables regardless of matches', 'Only unmatched rows', 'Only columns with numeric values'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-joins-4', topicId: 'sql-joins',
+    prompt: 'What can happen when a JOIN uses a non-unique or incorrect key?',
+    options: ['Rows can be duplicated or incorrectly matched', 'SQL automatically repairs the schema', 'The query becomes a SELECT *', 'All NULL values disappear'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-joins-5', topicId: 'sql-joins',
+    prompt: 'Before writing a JOIN, what should you determine first?',
+    options: ['Which columns represent the relationship between the tables', 'Which column has the longest name', 'Whether ORDER BY is required', 'Whether every table has the same row count'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-window-1', topicId: 'sql-window',
+    prompt: 'What does a SQL window function allow you to do?',
+    options: ['Calculate across related rows while keeping individual rows in the result', 'Delete rows outside a date range', 'Create a new database automatically', 'Replace every JOIN with a subquery'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-window-2', topicId: 'sql-window',
+    prompt: 'Which keyword defines the window used by functions such as RANK or ROW_NUMBER?',
+    options: ['OVER', 'HAVING', 'VALUES', 'ALTER'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-window-3', topicId: 'sql-window',
+    prompt: 'What does PARTITION BY do inside a window definition?',
+    options: ['Splits rows into groups for independent window calculations', 'Deletes duplicate partitions', 'Creates a physical table partition automatically', 'Sorts the entire database'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-window-4', topicId: 'sql-window',
+    prompt: 'Which function is appropriate for assigning an ordered row number within a window?',
+    options: ['ROW_NUMBER()', 'COUNT_TABLE()', 'ROW_SORT()', 'INDEX_ROW()'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-sql-window-5', topicId: 'sql-window',
+    prompt: 'Why should analytical window-query results be validated?',
+    options: ['To confirm partitioning, ordering, row counts and calculated values match the intended analysis', 'To make human review unnecessary', 'To guarantee all future queries are correct', 'To remove the need for prerequisites'], correctOptionIndex: 0,
+  },
 ];
 
 export function getTopicPracticeQuestions(topicId?: string): TopicPracticeQuestion[] {

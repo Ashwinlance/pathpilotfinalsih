@@ -111,6 +111,19 @@ export const learningAssistantGuides: LearningAssistantGuide[] = [
     },
   },
   {
+    topicId: 'sql-window',
+    explanation: 'SQL window functions calculate values across related rows while keeping each row in the result. OVER defines the window, PARTITION BY creates groups, ORDER BY defines sequence, and functions such as ROW_NUMBER, RANK and SUM can produce rankings or running calculations. Validation checks that partitions, ordering and row counts match the intended analysis.',
+    simplified: 'Window functions let SQL compare or calculate across nearby rows without grouping those rows into one result.',
+    hint: 'First decide the group of rows that should be compared, then decide the order inside that group. Translate those choices into PARTITION BY and ORDER BY inside OVER(...).',
+    example: 'Example:\n\nSELECT learner_id, score,\n       RANK() OVER (ORDER BY score DESC) AS score_rank\nFROM assessment_results;\n\nEach row stays visible while SQL calculates a rank across the result.',
+    keyTerms: {
+      window: 'A window is the set of rows used by a window function for the current result row.',
+      partition: 'PARTITION BY divides the window into independent groups before calculation.',
+      rank: 'RANK assigns ordered positions and gives equal values the same rank.',
+      validation: 'Validation checks row counts, ordering, partitions and expected analytical results.',
+    },
+  },
+  {
     topicId: 'stats-probability',
     explanation: 'Probability describes uncertainty using values from 0 to 1. Conditional probability focuses on the chance of an event when some information is already known.',
     simplified: 'Probability tells you how likely something is. Conditional probability updates that likelihood when you learn something new.',

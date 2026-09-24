@@ -2,8 +2,11 @@ import type { Learner, LearnerState } from '../../types/learner';
 
 export const demoLearner: Learner = {
   id: 'learner-ananya',
+  studentId: 'PP-ANANYA-001',
   name: 'Ananya',
   email: 'ananya.demo@pathpilot.local',
+  careerTrack: 'Data & Analytics',
+  currentRoleId: 'role-data-operations-trainee',
   targetRoleId: 'role-statistical-data-analyst',
 };
 

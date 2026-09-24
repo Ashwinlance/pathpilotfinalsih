@@ -4,21 +4,28 @@ import type { AuditRecord, GovernanceProposal } from '../../types/governance';
 export function GovernancePanel({
   proposals,
   audit,
-  knowledgeVersion,
+  pythonKnowledgeVersion,
+  sqlKnowledgeVersion,
   pythonRequiredLevel,
-  governedTopicApplied,
+  sqlRequiredLevel,
+  pythonGovernedTopicApplied,
+  sqlGovernedTopicApplied,
   onCreate,
   onReview,
 }: {
   proposals: GovernanceProposal[];
   audit: AuditRecord[];
-  knowledgeVersion: number;
+  pythonKnowledgeVersion: number;
+  sqlKnowledgeVersion: number;
   pythonRequiredLevel: number;
-  governedTopicApplied: boolean;
-  onCreate: () => void;
+  sqlRequiredLevel: number;
+  pythonGovernedTopicApplied: boolean;
+  sqlGovernedTopicApplied: boolean;
+  onCreate: (target: 'PYTHON' | 'SQL') => void;
   onReview: (d: 'APPROVE' | 'REJECT') => void;
 }) {
   const latest = proposals.at(-1);
+  const isSql = latest?.fingerprint === 'sql-standard-v2';
   return <div>
     <div className="grid gap-3 md:grid-cols-3">
       <GovStep icon={<Bot size={18}/>} title="AI-assisted proposal" text="Extract and analyze from authorized material."/>
@@ -26,14 +33,16 @@ export function GovernancePanel({
       <GovStep icon={<FileCheck2 size={18}/>} title="Audited update" text="Approved versions create a review trail."/>
     </div>
 
-    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-      <Status label="Competency standard" value={`Version ${knowledgeVersion}`}/>
-      <Status label="Python requirement" value={`${pythonRequiredLevel}%`}/>
-      <Status label="Governed topic" value={governedTopicApplied ? 'Python Testing & Validation' : 'Not added yet'}/>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <Status label="Python standard" value={`Version ${pythonKnowledgeVersion} · ${pythonRequiredLevel}%`}/>
+      <Status label="Python governed topic" value={pythonGovernedTopicApplied ? 'Python Testing & Validation' : 'Not added yet'}/>
+      <Status label="SQL standard" value={`Version ${sqlKnowledgeVersion} · ${sqlRequiredLevel}%`}/>
+      <Status label="SQL governed topic" value={sqlGovernedTopicApplied ? 'SQL Window Functions & Validation' : 'Not added yet'}/>
     </div>
 
     <div className="mt-5 flex flex-wrap gap-2">
-      <button className="btn-primary" onClick={onCreate}>Generate demo proposal</button>
+      <button className="btn-primary" onClick={() => onCreate('PYTHON')}>Generate Python v2 proposal</button>
+      <button className="btn-secondary" onClick={() => onCreate('SQL')}>Generate SQL v2 proposal</button>
       {latest?.status === 'PENDING_REVIEW' && <>
         <button className="btn-secondary" onClick={() => onReview('APPROVE')}>Approve as reviewer</button>
         <button className="btn-secondary" onClick={() => onReview('REJECT')}>Reject</button>
@@ -47,8 +56,8 @@ export function GovernancePanel({
       </div>
       <p className="mt-2 text-sm text-slate-600">{latest.proposedChange}</p>
       <p className="mt-2 text-xs text-slate-500">AI confidence: {Math.round(latest.aiConfidence * 100)}% · human approval still required</p>
-      {latest.status === 'PENDING_REVIEW' && <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs font-semibold text-amber-800"><ArrowUpRight size={15} className="mt-0.5 shrink-0"/><span>Proposed impact only: Python remains at 80% until a human reviewer approves. Approval raises the required level to 85% and adds one governed learner-roadmap topic.</span></div>}
-      {latest.status === 'APPROVED' && <div className="mt-3 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-xs font-semibold text-emerald-800"><BookOpenCheck size={15} className="mt-0.5 shrink-0"/><span>Applied: Python requirement is now 85% and Python Testing & Validation has been added to the governed learner roadmap.</span></div>}
+      {latest.status === 'PENDING_REVIEW' && <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs font-semibold text-amber-800"><ArrowUpRight size={15} className="mt-0.5 shrink-0"/><span>{isSql ? 'Proposed impact only: SQL remains at 78% until a human reviewer approves. Approval raises the required level to 83% and adds SQL Window Functions & Validation to the governed learner roadmap.' : 'Proposed impact only: Python remains at 80% until a human reviewer approves. Approval raises the required level to 85% and adds Python Testing & Validation to the governed learner roadmap.'}</span></div>}
+      {latest.status === 'APPROVED' && <div className="mt-3 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-xs font-semibold text-emerald-800"><BookOpenCheck size={15} className="mt-0.5 shrink-0"/><span>{isSql ? 'Applied: SQL requirement is now 83% and SQL Window Functions & Validation has been added to the governed learner roadmap.' : 'Applied: Python requirement is now 85% and Python Testing & Validation has been added to the governed learner roadmap.'}</span></div>}
     </div>}
     {audit.length > 0 && <p className="mt-3 text-xs text-slate-500">Audit records: {audit.length}. Latest action: {audit.at(-1)?.action} by {audit.at(-1)?.actorId}.</p>}
   </div>;
