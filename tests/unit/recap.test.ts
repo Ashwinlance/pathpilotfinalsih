@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { topicPracticeQuestions } from '../../src/data/learning/topicPracticeQuestions';
-import { buildRecapQuestions, detectRecapOffer, gradeRecap } from '../../src/services/learning/recapService';
+import { buildRecapQuestions, createManualRecapOffer, detectRecapOffer, gradeRecap } from '../../src/services/learning/recapService';
 
 describe('recap mode', () => {
   it('offers recap only after the inactivity threshold and with learned topics', () => {
@@ -21,4 +21,18 @@ describe('recap mode', () => {
     expect(result.score).toBe(40);
     expect(result.weakTopicIds).toEqual(['py-functions']);
   });
+  it('offers an optional recap exactly at the seven-day threshold', () => {
+    const offer = detectRecapOffer({
+      lastActiveAt: '2026-09-01T00:00:00.000Z',
+      now: '2026-09-08T00:00:00.000Z',
+      learnedTopicIds: ['py-functions'],
+    });
+    expect(offer).toEqual({ daysAway: 7, topicIds: ['py-functions'], status: 'OFFERED' });
+  });
+
+  it('can create an on-demand recap offer without waiting seven days', () => {
+    expect(createManualRecapOffer(['py-functions', 'py-data'])).toEqual({ daysAway: 0, topicIds: ['py-functions', 'py-data'], status: 'OFFERED' });
+    expect(createManualRecapOffer([])).toBeUndefined();
+  });
+
 });

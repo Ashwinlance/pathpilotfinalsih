@@ -6,7 +6,6 @@ export const currentDemoRole: Role = {
   description: 'Supports routine data preparation, validation and reporting while building analyst-level competency.',
   competencyRequirements: [
     { competencyId: 'comp-python', requiredLevel: 45 },
-    { competencyId: 'comp-sql', requiredLevel: 50 },
     { competencyId: 'comp-stats', requiredLevel: 55 },
     { competencyId: 'comp-viz', requiredLevel: 55 },
   ],
@@ -15,10 +14,9 @@ export const currentDemoRole: Role = {
 export const demoRole: Role = {
   id: 'role-statistical-data-analyst',
   name: 'Statistical Data Analyst',
-  description: 'Analyzes structured data using statistics, Python, SQL and clear visual communication.',
+  description: 'Analyzes structured data using statistics, Python and clear visual communication.',
   competencyRequirements: [
     { competencyId: 'comp-python', requiredLevel: 80 },
-    { competencyId: 'comp-sql', requiredLevel: 78 },
     { competencyId: 'comp-stats', requiredLevel: 82 },
     { competencyId: 'comp-viz', requiredLevel: 75 },
   ],

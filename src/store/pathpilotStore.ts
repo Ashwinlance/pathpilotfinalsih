@@ -9,8 +9,7 @@ import { questions, questionPools } from '../data/assessments/questions';
 import { pythonInitialDiagnosticConfig, pythonInitialDiagnosticQuestions } from '../data/assessments/initialDiagnostic';
 import { governanceSources } from '../data/governance/sources';
 import { pythonCompetencyUpdateV2 } from '../data/governance/pythonCompetencyUpdate';
-import { sqlCompetencyUpdateV2 } from '../data/governance/sqlCompetencyUpdate';
-import type { AdaptiveState, Roadmap } from '../types/adaptive';
+import type { AdaptiveState } from '../types/adaptive';
 import type { Assessment, AssessmentAnswer, AssessmentGuidance, AssessmentMaterial, AssessmentResult, DiagnosticAssessment, DiagnosticResult, Question, QuestionPool } from '../types/assessment';
 import type { Evidence, LearningState, RecapOffer, RecapResult, StudyPack, StudyQuizAnswer, StudyQuizResult, TopicPracticeAnswer, TopicPracticeQuestion, TopicPracticeResult, Verification } from '../types/learning';
 import type { LearnerState } from '../types/learner';
@@ -20,7 +19,7 @@ import type { Role } from '../types/role';
 import { buildInitialAdaptiveState, applyVerificationEvidence } from '../services/adaptive/adaptiveLoopService';
 import { completeLearning, startLearning, verifyLearning } from '../services/learning/learningService';
 import { gradeTopicPractice } from '../services/learning/topicPracticeService';
-import { buildRecapQuestions, detectRecapOffer, gradeRecap } from '../services/learning/recapService';
+import { buildRecapQuestions, createManualRecapOffer, detectRecapOffer, gradeRecap } from '../services/learning/recapService';
 import { loadLearnerActivity, saveLearnerActivity } from '../services/persistence/recapActivityRepository';
 import { generateStudyPack, gradeStudyQuiz } from '../services/learning/studyMaterialService';
 import { createAssessment, gradeAssessment } from '../services/assessment/assessmentService';
@@ -38,8 +37,6 @@ interface StoreState {
   learnerState: LearnerState;
   targetRole: Role;
   knowledgeVersion: number;
-  sqlKnowledgeVersion: number;
-  sqlRoadmap?: Roadmap;
   topics: Topic[];
   adaptiveState: AdaptiveState;
   diagnosticQuestions: Question[];
@@ -79,6 +76,7 @@ interface StoreState {
   submitCurrentPractice: () => void;
   retryCurrentPractice: () => void;
   checkRecapOnReturn: () => void;
+  startRecapNow: () => void;
   recordLearnerActivity: () => void;
   acceptRecap: () => void;
   declineRecap: () => void;
@@ -95,7 +93,7 @@ interface StoreState {
   startIndependentAssessment: () => void;
   answerIndependentAssessment: (questionId: string, selectedOptionIndex: number) => void;
   submitIndependentAssessment: () => void;
-  createGovernanceDemoProposal: (target?: 'PYTHON' | 'SQL') => void;
+  createGovernanceDemoProposal: () => void;
   reviewLatestProposal: (decision: 'APPROVE' | 'REJECT') => void;
   resetDemo: () => void;
 }
@@ -124,8 +122,6 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
   learnerState: structuredClone(demoLearnerState),
   targetRole: structuredClone(demoRole),
   knowledgeVersion: 1,
-  sqlKnowledgeVersion: 1,
-  sqlRoadmap: undefined,
   topics: structuredClone(initialTopics),
   adaptiveState: makeInitialAdaptive(),
   diagnosticQuestions: structuredClone(pythonInitialDiagnosticQuestions),
@@ -196,7 +192,14 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
   },
   completeCurrentLearning: () => {
     const state = get(); if (!state.diagnosticResult || !state.learningState) return;
-    set({ learningState: completeLearning(state.learningState), adaptiveState: { ...state.adaptiveState, completedTopics: [...new Set([...state.adaptiveState.completedTopics, state.adaptiveState.currentAction.targetTopicId].filter(Boolean) as string[])] } });
+    const topicId = state.adaptiveState.currentAction.targetTopicId;
+    const completedTopics = [...new Set([...state.adaptiveState.completedTopics, topicId].filter(Boolean) as string[])];
+    set({ learningState: completeLearning(state.learningState), adaptiveState: { ...state.adaptiveState, completedTopics } });
+    // Persist recap eligibility immediately when learning is completed. This avoids
+    // depending on beforeunload/visibility events, which browsers may skip.
+    if (completedTopics.length > 0) {
+      saveLearnerActivity({ learnerId: demoLearner.id, lastActiveAt: new Date().toISOString(), learnedTopicIds: completedTopics });
+    }
   },
   answerCurrentPractice: (questionId, selectedOptionIndex) => {
     const state = get();
@@ -226,6 +229,17 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const offer = detectRecapOffer({ lastActiveAt: previous.lastActiveAt, learnedTopicIds: previous.learnedTopicIds });
     if (offer) set({ recapOffer: offer, recapQuestions: [], recapAnswers: [], recapResult: undefined });
   },
+  startRecapNow: () => {
+    const state = get();
+    const learnedTopicIds = [...new Set([
+      ...state.adaptiveState.completedTopics,
+      ...state.adaptiveState.verifiedTopics,
+      ...state.evidence.map(item => item.topicId),
+    ])].filter(topicId => topicPracticeQuestions.some(question => question.topicId === topicId));
+    const offer = createManualRecapOffer(learnedTopicIds);
+    if (!offer) return;
+    set({ recapOffer: offer, recapQuestions: [], recapAnswers: [], recapResult: undefined });
+  },
   recordLearnerActivity: () => {
     const state = get();
     if (state.recapOffer?.status === 'OFFERED' || state.recapOffer?.status === 'STARTED') return;
@@ -233,7 +247,6 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
       ...state.adaptiveState.completedTopics,
       ...state.adaptiveState.verifiedTopics,
       ...state.evidence.map(item => item.topicId),
-      ...(state.diagnosticResult && state.adaptiveState.currentAction.targetTopicId ? [state.adaptiveState.currentAction.targetTopicId] : []),
     ])];
     if (learnedTopicIds.length === 0) return;
     saveLearnerActivity({ learnerId: demoLearner.id, lastActiveAt: new Date().toISOString(), learnedTopicIds });
@@ -328,6 +341,16 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
       topicPracticeAnswers: actionMovedToAnotherTopic ? [] : state.topicPracticeAnswers,
       topicPracticeResult: actionMovedToAnotherTopic ? undefined : state.topicPracticeResult,
     });
+    // Verification is another durable learner milestone. Persist it immediately so
+    // a future return can reliably trigger Recap Mode even if the tab is closed
+    // abruptly and beforeunload is not delivered.
+    const learnedTopicIds = [...new Set([
+      ...next.adaptiveState.completedTopics,
+      ...next.adaptiveState.verifiedTopics,
+      ...state.evidence.map(item => item.topicId),
+      result.evidence.topicId,
+    ])];
+    saveLearnerActivity({ learnerId: demoLearner.id, lastActiveAt: new Date().toISOString(), learnedTopicIds });
   },
   generateAssessmentQuestionPool: input => {
     const state = get();
@@ -399,21 +422,17 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const guidance = buildAssessmentGuidance({ result, topics: state.topics, modules: learningModules });
     set({ assessmentResult: result, assessmentGuidance: guidance });
   },
-  createGovernanceDemoProposal: (target = 'PYTHON') => {
+  createGovernanceDemoProposal: () => {
     const state = get();
-    const isSql = target === 'SQL';
-    const update = isSql ? sqlCompetencyUpdateV2 : pythonCompetencyUpdateV2;
     try {
       const proposal = createProposal({
         id: `proposal-${state.proposals.length + 1}`,
-        source: isSql ? governanceSources[1] : governanceSources[0],
-        title: isSql ? 'SQL competency standard v2' : 'Python competency standard v2',
-        proposedChange: isSql
-          ? 'Raise the Statistical Data Analyst SQL requirement from 78% to 83% and add SQL Window Functions & Validation as a governed roadmap topic.'
-          : 'Raise the Statistical Data Analyst Python requirement from 80% to 85% and add Python Testing & Validation as a governed roadmap topic.',
+        source: governanceSources[0],
+        title: 'Python competency standard v2',
+        proposedChange: 'Raise the Statistical Data Analyst Python requirement from 80% to 85% and add Python Testing & Validation as a governed roadmap topic.',
         evidenceSummary: 'Deterministic prototype extraction from an authorized competency-standard update. Human approval is required before the requirement or curriculum changes.',
-        aiConfidence: isSql ? 0.86 : 0.87,
-        fingerprint: update.id,
+        aiConfidence: 0.87,
+        fingerprint: pythonCompetencyUpdateV2.id,
         existing: state.proposals,
       });
       set({ proposals: [...state.proposals, proposal] });
@@ -437,31 +456,24 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
       return;
     }
 
-    const update = latest.fingerprint === sqlCompetencyUpdateV2.id ? sqlCompetencyUpdateV2 : pythonCompetencyUpdateV2;
+    const update = pythonCompetencyUpdateV2;
     const learnerCompetency = state.learnerState.competencies.find(c => c.competencyId === update.competencyId);
     if (!learnerCompetency) return;
-    const activeCompetency = state.adaptiveState.competencyId === update.competencyId;
     const currentRequirement = state.targetRole.competencyRequirements.find(item => item.competencyId === update.competencyId)?.requiredLevel ?? update.previousRequiredLevel;
-    const baseAdaptive = activeCompetency
-      ? state.adaptiveState
-      : buildInitialAdaptiveState({ learnerId: demoLearner.id, learnerCompetency, requiredLevel: currentRequirement, topics: state.topics }).adaptiveState;
     const applied = applyApprovedGovernanceKnowledgeUpdate({
       proposal: reviewed.proposal,
       update,
       role: state.targetRole,
       topics: state.topics,
       learnerCompetency,
-      adaptiveState: baseAdaptive,
+      adaptiveState: state.adaptiveState,
     });
-    const actionChanged = activeCompetency && applied.adaptiveState.currentAction.targetTopicId !== state.adaptiveState.currentAction.targetTopicId;
-    const isSql = update.competencyId === sqlCompetencyUpdateV2.competencyId;
+    const actionChanged = applied.adaptiveState.currentAction.targetTopicId !== state.adaptiveState.currentAction.targetTopicId;
     set({
       targetRole: applied.role,
-      knowledgeVersion: isSql ? state.knowledgeVersion : update.version,
-      sqlKnowledgeVersion: isSql ? update.version : state.sqlKnowledgeVersion,
-      sqlRoadmap: isSql ? applied.adaptiveState.roadmap : state.sqlRoadmap,
+      knowledgeVersion: update.version,
       topics: applied.topics,
-      adaptiveState: activeCompetency ? applied.adaptiveState : state.adaptiveState,
+      adaptiveState: applied.adaptiveState,
       proposals: state.proposals.map(p => p.id === latest.id ? reviewed.proposal : p),
       audit: [...state.audit, reviewed.audit],
       learningState: actionChanged ? undefined : state.learningState,
@@ -474,8 +486,6 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     learnerState: structuredClone(demoLearnerState),
     targetRole: structuredClone(demoRole),
     knowledgeVersion: 1,
-    sqlKnowledgeVersion: 1,
-    sqlRoadmap: undefined,
     topics: structuredClone(initialTopics),
     adaptiveState: makeInitialAdaptive(),
     diagnosticQuestions: structuredClone(pythonInitialDiagnosticQuestions),

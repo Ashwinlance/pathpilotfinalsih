@@ -15,19 +15,7 @@ const pythonQuestions: Question[] = Array.from({ length: 15 }, (_, i) => {
   } as Question;
 });
 
-const sqlQuestions: Question[] = Array.from({ length: 15 }, (_, i) => ({
-  id: `q-sql-${i + 1}`,
-  competencyId: 'comp-sql',
-  topicId: i % 3 === 0 ? 'sql-select' : i % 3 === 1 ? 'sql-filter' : 'sql-joins',
-  prompt: `SQL diagnostic question ${i + 1}: choose the most reliable relational-query approach.`,
-  options: ['Use explicit columns and deliberate predicates', 'Use SELECT * everywhere', 'Join without keys', 'Depend on row order'],
-  correctOptionIndex: 0,
-  difficulty: i < 5 ? 'FOUNDATION' : i < 10 ? 'INTERMEDIATE' : 'ADVANCED',
-  sourceId: 'approved-sql-material-v1',
-}));
-
-export const questions: Question[] = [...pythonQuestions, ...sqlQuestions];
+export const questions: Question[] = [...pythonQuestions];
 export const questionPools: QuestionPool[] = [
   { id: 'pool-python', competencyId: 'comp-python', approved: true, questionIds: pythonQuestions.map(q => q.id) },
-  { id: 'pool-sql', competencyId: 'comp-sql', approved: true, questionIds: sqlQuestions.map(q => q.id) },
 ];

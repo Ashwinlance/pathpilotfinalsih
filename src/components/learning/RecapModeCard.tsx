@@ -19,14 +19,15 @@ export function RecapModeCard(props: Props) {
   const { offer, questions, answers, result, topics } = props;
   if (!offer) return null;
   const topicName = (id: string) => topics.find(topic => topic.id === id)?.name ?? id;
+  const manual = offer.daysAway === 0;
 
   if (offer.status === 'OFFERED') {
     return <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-panel">
       <div className="flex items-start gap-3">
         <div className="rounded-xl bg-indigo-100 p-2 text-indigo-700"><Clock3 size={20}/></div>
         <div className="flex-1">
-          <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">Welcome back · Recap mode</p>
-          <h2 className="mt-1 text-lg font-extrabold text-slate-950">You were away for {offer.daysAway} days. Want a quick knowledge recap?</h2>
+          <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">{manual ? 'On-demand recap' : 'Welcome back · Recap mode'}</p>
+          <h2 className="mt-1 text-lg font-extrabold text-slate-950">{manual ? 'Ready for a quick knowledge recap?' : `You were away for ${offer.daysAway} days. Want a quick knowledge recap?`}</h2>
           <p className="mt-2 text-sm text-slate-600">PathPilot can ask 5 short MCQs from topics you learned before your break, then show which areas may need review. Recap results do not directly change your official competency or roadmap.</p>
           <div className="mt-3 flex flex-wrap gap-2">{offer.topicIds.map(id => <span key={id} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700">{topicName(id)}</span>)}</div>
           <div className="mt-4 flex flex-wrap gap-2"><button className="btn-primary" onClick={props.onAccept}><Brain size={15}/> Yes, start recap</button><button className="btn-secondary" onClick={props.onDecline}><X size={15}/> No, continue learning</button></div>

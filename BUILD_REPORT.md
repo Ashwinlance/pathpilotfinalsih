@@ -140,20 +140,6 @@ Validation performed in the build workspace:
 Added a governed competency-standard application flow. The demo proposal remains non-operative until human approval. Approval changes the Statistical Data Analyst Python requirement from 80% to 85%, adds Python Testing & Validation to the governed topic catalog and learner roadmap, recalculates the gap/adaptive action, and records the review in the audit trail. Rejection makes no competency or roadmap change.
 
 
-## SQL governance parity update
-
-Added a second governed competency-standard path for SQL while preserving the single Adaptive Decision Engine.
-
-Validated behavior:
-- pending SQL proposal cannot modify approved knowledge;
-- human approval changes required SQL competency **78 → 83**;
-- `SQL Window Functions & Validation` is added once after approval;
-- the governed SQL roadmap contains the new topic;
-- `sql-select`, `sql-filter`, `sql-joins`, and `sql-window` each have exactly five practice MCQs;
-- the new SQL learning module and AI-coach guide are present;
-- existing core validation remains **15/15 passed**.
-
-Full dependency-backed `npm test` / `npm run build` should still be executed on the user's local project before commit/push because dependency installation is unavailable in this execution environment.
 
 ## Recap Mode update
 
@@ -189,3 +175,30 @@ Validation in this build workspace:
 - `npm run validate:core`: PASS, existing 15/15 checks.
 - Role-readiness service smoke test: PASS; Python 48 current / 80 required / 32 gap and 4 target-role skills returned.
 - Full dependency-backed React/Vitest/Vite validation could not be completed in this container because package installation timed out; run `npm run typecheck`, `npm test`, `npm run build`, and `npm run validate:core` locally after copying the cumulative update.
+
+## Residual gap / competency-scope update
+
+- Fixed the state where a remaining Python gap could produce `REASSESS` with no target topic and therefore no learning button.
+- If a gap remains after all topics exceed the weak-topic threshold, the skill-gap engine now selects the lowest-mastered current topic as a concrete focus.
+- Adaptive decisions prefer unresolved/unverified target topics before falling back to practice on an already verified topic.
+- Learner gap diagnosis now distinguishes the weakest **initial diagnostic** topic from the **current focus topic**.
+- The learner competency chart is scoped to the diagnosed competency (Python in the current prototype).
+- Statistics and Data Visualization stay in target-role requirements but are shown as not diagnosed rather than using static demo scores as if they were assessed.
+- SQL-specific demo data and governance controls were removed from this prototype; adaptive services remain domain-independent.
+- `npm run validate:core`: 15/15 checks passed in the build environment.
+- Additional residual-gap smoke check: gap 16 produced a concrete Python learning target instead of an empty roadmap action.
+- Full dependency-backed typecheck/test/build was not rerun in this container because the extracted package does not include installed npm dependencies. Run those commands in the existing local PathPilot repository after copying the update.
+
+## Recap Mode reliability fix
+
+- Fixed recap eligibility persistence so completed learning is saved immediately instead of relying only on browser unload/visibility events.
+- Successful verification now also persists learned-topic activity for future recap eligibility.
+- Removed the current-but-not-yet-learned adaptive target from recap history.
+- Added a visible learner-dashboard Recap Mode status card explaining when the optional recap will appear.
+- Added a regression test for the exact 7-day threshold.
+- `npm run validate:core`: PASS (15/15).
+- Full dependency-backed Vitest/Vite validation was not rerun in the build environment because npm installation timed out; run `npm run typecheck`, `npm test`, and `npm run build` locally before committing.
+
+## Recap demo control
+
+Added an explicit **Take recap now** action once the learner has completed at least one topic. It creates an on-demand recap offer using the same five-question, weak-topic analysis path as the seven-day inactivity trigger.

@@ -3,6 +3,12 @@ import type { TopicPracticeAnswer, TopicPracticeQuestion, RecapOffer, RecapResul
 export const DEFAULT_RECAP_INACTIVITY_DAYS = 7;
 export const DEFAULT_RECAP_QUESTION_COUNT = 5;
 
+export function createManualRecapOffer(learnedTopicIds: string[]): RecapOffer | undefined {
+  const topicIds = [...new Set(learnedTopicIds)];
+  if (topicIds.length === 0) return undefined;
+  return { daysAway: 0, topicIds, status: 'OFFERED' };
+}
+
 export function detectRecapOffer(input: {
   lastActiveAt?: string;
   learnedTopicIds: string[];

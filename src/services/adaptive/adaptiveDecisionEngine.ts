@@ -25,9 +25,10 @@ export function decideNextAction(input: AdaptiveDecisionInput): AdaptiveDecision
     };
   }
 
-  const targetId = skillGap.affectedTopicIds[0];
+  const targetIds = skillGap.affectedTopicIds;
+  const targetId = targetIds.find(id => !verifiedTopics.includes(id)) ?? targetIds[0];
   if (!targetId) {
-    return { action: 'REASSESS', reason: 'Competency gap exists but no weak topic is currently identified.', expectedOutcome: 'Collect fresh evidence to localize the remaining gap.' };
+    return { action: 'REASSESS', reason: 'Competency gap exists but no topic evidence is available.', expectedOutcome: 'Collect fresh evidence to localize the remaining gap.' };
   }
   if (!completedTopics.includes(targetId)) {
     return { action: 'LEARN_TARGET', targetTopicId: targetId, reason: `${topicName(topics, targetId)} is the highest-priority unresolved topic.`, expectedOutcome: 'Build target knowledge before verification.' };
@@ -35,7 +36,7 @@ export function decideNextAction(input: AdaptiveDecisionInput): AdaptiveDecision
   if (!verifiedTopics.includes(targetId)) {
     return { action: 'VERIFY', targetTopicId: targetId, reason: 'Learning is complete, but mastery has not been verified.', expectedOutcome: 'Produce approved evidence before competency changes.' };
   }
-  return { action: 'PRACTICE', targetTopicId: targetId, reason: 'The topic is verified but the overall competency gap remains.', expectedOutcome: 'Consolidate performance and prepare for reassessment.' };
+  return { action: 'PRACTICE', targetTopicId: targetId, reason: `${topicName(topics, targetId)} is currently the lowest-mastered available topic while the overall competency gap remains.`, expectedOutcome: 'Reinforce the weakest current topic and collect fresh verification evidence.' };
 }
 
 function topicName(topics: Topic[], id: string) {

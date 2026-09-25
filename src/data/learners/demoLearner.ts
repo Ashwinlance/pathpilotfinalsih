@@ -15,7 +15,6 @@ export const demoLearnerState: LearnerState = {
   targetRoleId: demoLearner.targetRoleId,
   competencies: [
     { competencyId: 'comp-python', currentLevel: 48, evidence: [], updatedAt: '2026-09-24T10:00:00.000Z' },
-    { competencyId: 'comp-sql', currentLevel: 54, evidence: [], updatedAt: '2026-09-24T10:00:00.000Z' },
     { competencyId: 'comp-stats', currentLevel: 67, evidence: [], updatedAt: '2026-09-24T10:00:00.000Z' },
     { competencyId: 'comp-viz', currentLevel: 72, evidence: [], updatedAt: '2026-09-24T10:00:00.000Z' },
   ],

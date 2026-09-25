@@ -8,10 +8,8 @@ describe('role readiness', () => {
   it('derives required skills and gaps from the selected target role', () => {
     const readiness = calculateRoleSkillReadiness({ learnerState: demoLearnerState, targetRole: demoRole, competencies });
     const python = readiness.find(item => item.competencyId === 'comp-python');
-    const sql = readiness.find(item => item.competencyId === 'comp-sql');
     expect(readiness).toHaveLength(demoRole.competencyRequirements.length);
     expect(python).toMatchObject({ competencyName: 'Python Programming', currentLevel: 48, requiredLevel: 80, gap: 32, status: 'PRIORITY_GAP' });
-    expect(sql).toMatchObject({ currentLevel: 54, requiredLevel: 78, gap: 24 });
   });
 
   it('uses updated target-role requirements without changing learner competency', () => {

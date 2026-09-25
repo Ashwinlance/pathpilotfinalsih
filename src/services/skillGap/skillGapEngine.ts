@@ -7,7 +7,12 @@ export function analyzeSkillGap(
   topics: Topic[],
 ): SkillGapAnalysis {
   const relevant = topics.filter(t => t.competencyId === competency.competencyId).sort((a, b) => a.order - b.order);
-  const affected = relevant.filter(t => t.mastery < 70);
+  const belowThreshold = relevant.filter(t => t.mastery < 70);
+  const fallbackTopic = competency.gap > 0 && belowThreshold.length === 0 && relevant.length > 0
+    ? [...relevant].sort((a, b) => a.mastery - b.mastery || a.order - b.order)[0]
+    : undefined;
+  const fallbackFocus = fallbackTopic ? [fallbackTopic] : [];
+  const affected = belowThreshold.length > 0 ? belowThreshold : fallbackFocus;
   const blocking = new Set<string>();
 
   for (const topic of affected) {
@@ -24,9 +29,11 @@ export function analyzeSkillGap(
   const firstBlocking = [...blocking][0];
   const explanation = firstBlocking
     ? `${firstAffected?.name ?? 'Target learning'} is constrained by insufficient mastery of ${topics.find(t => t.id === firstBlocking)?.name ?? firstBlocking}.`
-    : competency.gap > 0
-      ? `The learner remains ${competency.gap} points below the required competency and should address the weakest target topic.`
-      : 'The required competency level has been reached.';
+    : competency.gap > 0 && firstAffected
+      ? `The learner remains ${competency.gap} points below the required competency. ${firstAffected.name} is the current lowest-mastered topic, so PathPilot keeps a concrete learning focus instead of leaving the roadmap empty.`
+      : competency.gap > 0
+        ? `The learner remains ${competency.gap} points below the required competency and needs fresh evidence to localize the gap.`
+        : 'The required competency level has been reached.';
 
   return {
     competencyId: competency.competencyId,
