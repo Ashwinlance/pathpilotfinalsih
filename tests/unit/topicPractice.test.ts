@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { learningModules } from '../../src/data/learning/modules';
-import { topicPracticeQuestions } from '../../src/data/learning/topicPracticeQuestions';
+import { getTopicPracticeQuestions, topicPracticeQuestions } from '../../src/data/learning/topicPracticeQuestions';
 import { demoLearnerState } from '../../src/data/learners/demoLearner';
 import { initialTopics } from '../../src/data/topics/topics';
 import { buildInitialAdaptiveState, applyVerificationEvidence } from '../../src/services/adaptive/adaptiveLoopService';
@@ -8,17 +8,24 @@ import { verifyLearning } from '../../src/services/learning/learningService';
 import { gradeTopicPractice } from '../../src/services/learning/topicPracticeService';
 
 describe('topic practice', () => {
-  it('provides exactly five mastery-check MCQs for every Python learning topic', () => {
+  it('keeps a validated question bank and selects exactly five mastery-check MCQs per Python topic', () => {
     for (const topicId of ['py-basics', 'py-functions', 'py-data', 'py-analysis', 'py-testing']) {
       expect(learningModules.some(module => module.topicId === topicId)).toBe(true);
-      expect(topicPracticeQuestions.filter(question => question.topicId === topicId)).toHaveLength(5);
+      expect(topicPracticeQuestions.filter(question => question.topicId === topicId).length).toBeGreaterThanOrEqual(8);
+      expect(getTopicPracticeQuestions(topicId, 'attempt-a')).toHaveLength(5);
     }
   });
 
-
+  it('dynamically selects a different validated subset for different attempts', () => {
+    const first = getTopicPracticeQuestions('py-functions', 'attempt-a').map(question => question.id);
+    const second = getTopicPracticeQuestions('py-functions', 'attempt-b').map(question => question.id);
+    expect(first).toHaveLength(5);
+    expect(second).toHaveLength(5);
+    expect(first).not.toEqual(second);
+  });
 
   it('grades the five-question check deterministically', () => {
-    const questions = topicPracticeQuestions.filter(question => question.topicId === 'py-functions');
+    const questions = getTopicPracticeQuestions('py-functions', 'grading');
     const result = gradeTopicPractice(
       'py-functions',
       questions,
@@ -32,13 +39,13 @@ describe('topic practice', () => {
   });
 
   it('turns a passing five-question check into verification evidence before competency increases', () => {
-    const questions = topicPracticeQuestions.filter(question => question.topicId === 'py-functions');
+    const questions = getTopicPracticeQuestions('py-functions', 'verification');
     const practice = gradeTopicPractice(
       'py-functions',
       questions,
       questions.map((question, index) => ({
         questionId: question.id,
-        selectedOptionIndex: index === 4 ? 1 : question.correctOptionIndex,
+        selectedOptionIndex: index === 4 ? (question.correctOptionIndex + 1) % question.options.length : question.correctOptionIndex,
       })),
       '2026-09-24T00:00:00.000Z',
     );

@@ -202,3 +202,13 @@ Validation in this build workspace:
 ## Recap demo control
 
 Added an explicit **Take recap now** action once the learner has completed at least one topic. It creates an on-demand recap offer using the same five-question, weak-topic analysis path as the seven-day inactivity trigger.
+
+## Progress/recap corrective update
+
+- Fixed stale diagnostic UI: current competency now reflects approved mastery updates while preserving the initial diagnostic baseline.
+- Fixed recap eligibility/display by deriving eligibility from completed topics, verified topics, and approved evidence.
+- Added integration coverage for diagnostic 48 -> passing 5-question mastery check -> competency 62 -> recap eligibility.
+- Expanded each Python mastery topic to a validated bank of at least 8 MCQs; each learning attempt selects 5 using a deterministic seeded selector.
+- Recap selects 5 questions dynamically from validated learned-topic banks.
+- Did **not** enable unconstrained AI-generated mastery questions because that would weaken deterministic grading and evidence integrity.
+- Core validation in the build environment: 15/15 passed.

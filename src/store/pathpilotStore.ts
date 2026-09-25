@@ -211,7 +211,7 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const state = get();
     const topicId = state.adaptiveState.currentAction.targetTopicId;
     if (!topicId || !state.learningState?.completedAt) return;
-    const practiceQuestions = getTopicPracticeQuestions(topicId);
+    const practiceQuestions = getTopicPracticeQuestions(topicId, state.learningState.startedAt);
     if (practiceQuestions.length !== 5 || practiceQuestions.some(question => !state.topicPracticeAnswers.some(answer => answer.questionId === question.id))) return;
     const result = gradeTopicPractice(topicId, practiceQuestions, state.topicPracticeAnswers);
     set({ topicPracticeResult: result });
@@ -254,7 +254,7 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
   acceptRecap: () => {
     const state = get();
     if (!state.recapOffer || state.recapOffer.status !== 'OFFERED') return;
-    const recapQuestions = buildRecapQuestions(state.recapOffer.topicIds, topicPracticeQuestions, 5);
+    const recapQuestions = buildRecapQuestions(state.recapOffer.topicIds, topicPracticeQuestions, 5, `${state.recapOffer.daysAway}:${new Date().toISOString()}`);
     if (recapQuestions.length === 0) {
       set({ recapOffer: undefined });
       return;
@@ -315,7 +315,7 @@ export const usePathPilotStore = create<StoreState>((set, get) => ({
     const state = get();
     if (!state.diagnosticResult || !state.learningState?.completedAt) return;
     const currentTopicId = state.adaptiveState.currentAction.targetTopicId;
-    const configuredPractice = getTopicPracticeQuestions(currentTopicId);
+    const configuredPractice = getTopicPracticeQuestions(currentTopicId, state.learningState.startedAt);
     if (configuredPractice.length > 0 && state.topicPracticeResult?.topicId !== currentTopicId) return;
     if (configuredPractice.length > 0 && (state.topicPracticeResult?.score ?? 0) < 70) return;
     const topicId = state.adaptiveState.currentAction.targetTopicId ?? 'py-functions';

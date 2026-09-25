@@ -191,3 +191,13 @@ Learners who have completed at least one topic can choose **Take recap now** to 
 ## Demo scope
 
 The current demo dataset focuses on Python, Statistics, and Data Visualization. SQL-specific demo competencies, topics, questions, learning modules, and governance controls have been removed; the adaptive architecture itself remains domain-independent.
+
+## Learner progress display + recap reliability fix
+
+The diagnostic result panel now distinguishes the **initial diagnostic baseline** from the learner's **current competency**. Approved mastery evidence updates the current competency and current topic mastery display, while the original diagnostic result remains visible as historical baseline evidence.
+
+Recap Mode is offered only when the learner has a completed/verified topic with a validated question bank. The manual **Take recap now** action uses the same eligibility rules as the automatic inactivity flow, so it cannot silently do nothing for an ineligible learner.
+
+### MCQ safety policy
+
+PathPilot does not use unconstrained runtime AI generation for mastery-critical scoring. Topic mastery and recap checks dynamically select from larger validated topic question banks using a seeded selector. The independent 15-question assessment continues to select dynamically from an approved/published pool. This keeps question selection adaptive without making competency updates depend on unreviewed generated answers.

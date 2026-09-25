@@ -33,9 +33,12 @@ export function buildRecapQuestions(
   topicIds: string[],
   questionBank: TopicPracticeQuestion[],
   count = DEFAULT_RECAP_QUESTION_COUNT,
+  seed = 'pathpilot-recap',
 ): TopicPracticeQuestion[] {
   const eligible = topicIds
-    .map(topicId => questionBank.filter(question => question.topicId === topicId))
+    .map(topicId => questionBank
+      .filter(question => question.topicId === topicId)
+      .sort((a, b) => seededRank(a.id, seed) - seededRank(b.id, seed)))
     .filter(group => group.length > 0);
   if (eligible.length === 0) return [];
 
@@ -89,4 +92,14 @@ export function gradeRecap(
     weakTopicIds: topicResults.filter(result => result.level === 'WEAK').map(result => result.topicId),
     completedAt: at,
   };
+}
+
+function seededRank(value: string, seed: string) {
+  const input = `${seed}:${value}`;
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }

@@ -172,9 +172,98 @@ export const topicPracticeQuestions: TopicPracticeQuestion[] = [
     options: ['They provide repeatable evidence that expected behavior still holds', 'They automatically approve governance proposals', 'They replace human review', 'They make prerequisites unnecessary'], correctOptionIndex: 0,
   },
 
+  {
+    id: 'practice-py-basics-6', topicId: 'py-basics',
+    prompt: 'Which expression converts the string "42" into an integer?',
+    options: ['int("42")', 'str(42)', 'bool("42")', 'list("42")'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-basics-7', topicId: 'py-basics',
+    prompt: 'What does the comparison 5 > 3 evaluate to?',
+    options: ['True', 'False', '5', '3'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-basics-8', topicId: 'py-basics',
+    prompt: 'Which operator checks whether two Python values are equal?',
+    options: ['==', '=', '=>', '!=!'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-functions-6', topicId: 'py-functions',
+    prompt: 'What happens if a Python function reaches the end without an explicit return?',
+    options: ['It returns None', 'It returns 0', 'It restarts automatically', 'It becomes global'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-functions-7', topicId: 'py-functions',
+    prompt: 'Why use a default parameter such as def greet(name="Guest")?',
+    options: ['It allows the argument to be omitted', 'It forces every call to pass two arguments', 'It makes name global', 'It disables return values'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-functions-8', topicId: 'py-functions',
+    prompt: 'Which statement best describes a pure helper function?',
+    options: ['It returns a result from explicit inputs with minimal hidden state', 'It always modifies global variables', 'It cannot accept parameters', 'It must print instead of return'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-data-6', topicId: 'py-data',
+    prompt: 'Which expression checks whether the key "age" exists in a dictionary named user?',
+    options: ['"age" in user', 'user.has("age")', 'age == user', 'user[age?]'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-data-7', topicId: 'py-data',
+    prompt: 'Which Python collection is immutable after creation?',
+    options: ['tuple', 'list', 'dictionary', 'set'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-data-8', topicId: 'py-data',
+    prompt: 'What does values[-1] normally return for a non-empty Python list?',
+    options: ['The last item', 'The first item', 'The list length', 'An automatic copy'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-analysis-6', topicId: 'py-analysis',
+    prompt: 'Why should an analysis pipeline preserve clear intermediate outputs?',
+    options: ['They make debugging and validation easier', 'They prevent all data changes', 'They remove the need for tests', 'They guarantee every assumption is correct'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-analysis-7', topicId: 'py-analysis',
+    prompt: 'Which practice improves reproducibility in an analysis workflow?',
+    options: ['Use explicit transformations with stable inputs', 'Depend on hidden notebook state', 'Edit source values manually each run', 'Skip validation'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-analysis-8', topicId: 'py-analysis',
+    prompt: 'What should a well-defined analytical step communicate?',
+    options: ['Its inputs, transformation, and expected output', 'Only its file name', 'Only its runtime', 'Only its author'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-testing-6', topicId: 'py-testing',
+    prompt: 'What makes a regression test useful after changing code?',
+    options: ['It checks that previously expected behavior still works', 'It automatically approves the change', 'It removes the need for expected results', 'It changes requirements automatically'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-testing-7', topicId: 'py-testing',
+    prompt: 'Why should a test have a clear expected result?',
+    options: ['So observed behavior can be compared against a defined outcome', 'So the test can skip execution', 'So every variable becomes global', 'So failures are hidden'], correctOptionIndex: 0,
+  },
+  {
+    id: 'practice-py-testing-8', topicId: 'py-testing',
+    prompt: 'Which is the best response to a failing deterministic validation check?',
+    options: ['Investigate the cause before accepting the output', 'Ignore the failure', 'Increase competency automatically', 'Delete the test'], correctOptionIndex: 0,
+  },
+
 ];
 
-export function getTopicPracticeQuestions(topicId?: string): TopicPracticeQuestion[] {
+export function getTopicPracticeQuestions(topicId?: string, seed = 'pathpilot-practice'): TopicPracticeQuestion[] {
   if (!topicId) return [];
-  return topicPracticeQuestions.filter(question => question.topicId === topicId);
+  return topicPracticeQuestions
+    .filter(question => question.topicId === topicId)
+    .sort((a, b) => seededRank(a.id, seed) - seededRank(b.id, seed))
+    .slice(0, 5);
+}
+
+function seededRank(value: string, seed: string) {
+  const input = `${seed}:${value}`;
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
